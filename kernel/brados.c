@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -80,13 +79,35 @@ void terminalPutEntryAt(char c, uint8_t color, size_t x, size_t y)
 	terminalBuf[index] = makeVGAEntry(c, color);
 }
 
+void terminalScroll()
+{
+	for (size_t i = 1; i < VGA_HEIGHT; i++) {
+		for (size_t j = 0; j < VGA_WIDTH; j++) {
+			const size_t index = i * VGA_WIDTH + j;
+			const size_t indexBelow = (i - 1) * VGA_WIDTH + j;
+			terminalBuf[indexBelow] = terminalBuf[index];
+		}
+	}
+	
+	for (size_t i = 0; i < VGA_WIDTH; i++) {
+		const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + i;
+		terminalBuf[index] = ' ';
+	}
+}
+
 void terminalPutChar(char c)
 {
-	terminalPutEntryAt(c, terminalColor, terminalCol, terminalRow);
+	if (c == '\n')
+		terminalCol = VGA_WIDTH - 1;
+	else
+		terminalPutEntryAt(c, terminalColor, terminalCol, terminalRow);
+	
 	if (terminalCol++ == VGA_WIDTH) {
 		terminalCol = 0;
-		if (terminalRow++ == VGA_HEIGHT)
-			terminalRow = 0;
+		if (terminalRow++ == VGA_HEIGHT) {
+			terminalRow--;
+			terminalScroll();
+		}
 	}
 }
 
