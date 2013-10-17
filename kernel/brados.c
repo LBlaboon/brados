@@ -7,7 +7,7 @@
 #endif
 
 // Color constants
-enum vgaColor
+enum vga_color
 {
 	COLOR_BLACK = 0,
 	COLOR_BLUE = 1,
@@ -27,18 +27,21 @@ enum vgaColor
 	COLOR_WHITE = 15
 };
 
-uint8_t makeColor(enum vgaColor fg, enum vgaColor bg)
+// Create a VGA color
+uint8_t make_color(enum vga_color fg, enum vga_color bg)
 {
 	return fg | bg << 4;
 }
 
-uint16_t makeVGAEntry(char c, uint8_t color)
+// Create a VGA character
+uint16_t make_vgaEntry(char c, uint8_t color)
 {
 	uint16_t c16 = c;
 	uint16_t color16 = color;
 	return c16 | color16 << 8;
 }
 
+// Calculate the length of a string
 size_t strlen(const char *str)
 {
 	size_t len = 0;
@@ -50,76 +53,104 @@ size_t strlen(const char *str)
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 24;
 
-size_t terminalRow, terminalCol;
-uint8_t terminalColor;
-uint16_t *terminalBuf;
+size_t term_row, term_col;
+uint8_t term_color;
+uint16_t *term_buf;
 
-void terminalInit()
+// Initialize the terminal
+void term_init()
 {
-	terminalRow = terminalCol = 0;
-	terminalColor = makeColor(COLOR_LIGHT_GREY, COLOR_BLACK);
-	terminalBuf = (uint16_t *) 0xB8000;
+	term_row = term_col = 0;
+	term_color = make_color(COLOR_LIGHT_GREY, COLOR_BLACK);
+	term_buf = (uint16_t *) 0xB8000;
 	
-	for (size_t x = 0; x < VGA_WIDTH; x++) {
-		for (size_t y = 0; y < VGA_HEIGHT; y++) {
+	for (size_t y = 0; y < VGA_HEIGHT; y++) {
+		for (size_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
-			terminalBuf[index] = makeVGAEntry(' ', terminalColor);
+			term_buf[index] = make_vgaEntry(' ', term_color);
 		}
 	}
 }
 
-void terminalSetColor(uint8_t color)
+// Set the terminal color
+void term_setColor(uint8_t color)
 {
-	terminalColor = color;
+	term_color = color;
 }
 
-void terminalPutEntryAt(char c, uint8_t color, size_t x, size_t y)
+// Place a character in the buffer
+void term_putEntryAt(char c, uint8_t color, size_t x, size_t y)
 {
 	const size_t index = y * VGA_WIDTH + x;
-	terminalBuf[index] = makeVGAEntry(c, color);
+	term_buf[index] = make_vgaEntry(c, color);
 }
 
-void terminalScroll()
+// Scroll down 1 line
+void term_scroll()
 {
-	for (size_t i = 1; i < VGA_HEIGHT; i++) {
-		for (size_t j = 0; j < VGA_WIDTH; j++) {
-			const size_t index = i * VGA_WIDTH + j;
-			const size_t indexBelow = (i - 1) * VGA_WIDTH + j;
-			terminalBuf[indexBelow] = terminalBuf[index];
+	for (size_t y = 1; y < VGA_HEIGHT; y++) {
+		for (size_t x = 0; x < VGA_WIDTH; x++) {
+			const size_t index = y * VGA_WIDTH + x;
+			const size_t indexBelow = (y - 1) * VGA_WIDTH + x;
+			term_buf[indexBelow] = term_buf[index];
 		}
 	}
 	
-	for (size_t i = 0; i < VGA_WIDTH; i++) {
-		const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + i;
-		terminalBuf[index] = ' ';
+	for (size_t x = 0; x < VGA_WIDTH; x++) {
+		const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+		term_buf[index] = ' ';
 	}
 }
 
-void terminalPutChar(char c)
+// Write a character to the terminal
+void term_putChar(char c)
 {
 	if (c == '\n')
-		terminalCol = VGA_WIDTH - 1;
+		term_col = VGA_WIDTH - 1;
 	else
-		terminalPutEntryAt(c, terminalColor, terminalCol, terminalRow);
+		term_putEntryAt(c, term_color, term_col, term_row);
 	
-	if (terminalCol++ == VGA_WIDTH) {
-		terminalCol = 0;
-		if (terminalRow++ == VGA_HEIGHT) {
-			terminalRow--;
-			terminalScroll();
+	if (++term_col == VGA_WIDTH) {
+		term_col = 0;
+		if (++term_row == VGA_HEIGHT) {
+			term_row--;
+			term_scroll();
 		}
 	}
 }
 
-void terminalWriteString(const char *data)
+// Write a string to the terminal
+void term_writeStr(const char *data)
 {
 	size_t dataLen = strlen(data);
 	for (size_t i = 0; i < dataLen; i++)
-		terminalPutChar(data[i]);
+		term_putChar(data[i]);
 }
 
+// Main kernel function
 void brados_main()
 {
-	terminalInit();
-	terminalWriteString("Welcome to BRaDOS!\n");
+	term_init();
+	
+	// Test printing and newlines
+	term_writeStr("Welcome to BRaDOS!\n");
+	term_writeStr("written by L. Bradley LaBoon\n\n");
+	
+	// Test line wrapping
+	term_writeStr("The Laughing Man always says: 'I thought what I'd do was I'd pretend I was one of those deaf mutes.'\n\n");
+	
+	// Test colors
+	term_setColor(make_color(COLOR_BLACK, COLOR_WHITE));
+	term_writeStr("This text should be inverse.\n");
+	term_setColor(make_color(COLOR_LIGHT_BLUE, COLOR_GREEN));
+	term_writeStr("This text should be colorful.\n\n");
+	
+	// Test scrolling
+	term_setColor(make_color(COLOR_LIGHT_GREY, COLOR_BLACK));
+	for (size_t i = 0; i < 20; i++) {
+		term_writeStr("Printing some lines.\n");
+		for (size_t j = 0; j < 100000000; j++);
+	}
+	
+	term_writeStr("Done.");
 }
