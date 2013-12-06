@@ -3,10 +3,10 @@ ENTRY(Start)
 SECTIONS
 {
 	/* Starts at LOADER_ADDR */
-	. = 0x8000
+	. = 0x8000;
 	_start = .;
 	_text_start = .;
-	.text:
+	.text :
 	{
 		KEEP(*(.text.boot))
 		*(.text)
@@ -15,15 +15,15 @@ SECTIONS
 	_text_end = .;
 	
 	_rodata_start = .;
-	.rodata:
+	.rodata :
 	{
 		*(.rodata)
 	}
-	. = ALIGN(4096)
+	. = ALIGN(4096);
 	_rodata_end = .;
 	
 	_data_start = .;
-	.data:
+	.data :
 	{
 		*(.data)
 	}
@@ -31,12 +31,12 @@ SECTIONS
 	_data_end = .;
 	
 	_bss_start = .;
-	.bss:
+	.bss :
 	{
 		bss = .;
 		*(.bss)
 	}
-	. = ALIGN(4096)
+	. = ALIGN(4096);
 	_bss_end = .;
 	_end = .;
 }
