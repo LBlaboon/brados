@@ -1,5 +1,9 @@
 Welcome to BRaDOS!
 
 BRaDOS is my personal OS project which I will be working on as I feel like it.
-The main purpose of the project is for me to learn about OS developement, as
-it's something I am interested in.
+The main purpose of the project is for me to learn about OS developement.
+
+For the most part, this project will do things the way Linux does things, with
+changes as I see fit. While I will make every attempt to ensure that the master
+git branch only contains compilable code, I make no guarantees. Use of this OS
+is entirely at your own risk.
