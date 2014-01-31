@@ -27,6 +27,9 @@ _start:
 	# Setup the stack
 	movl $stack_top, %esp
 	
+	# Push the multiboot information onto the stack
+	push %ebx
+	push %eax
 	# Call the main kernel function
 	call brados_main
 	

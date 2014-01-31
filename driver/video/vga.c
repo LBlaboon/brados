@@ -82,6 +82,26 @@ void term_setColor(struct vgastate *state, uint8_t color)
 	state->term_color = color;
 }
 
+// Test various VGA functionality
+void term_test(struct vgastate *term)
+{
+	// Test line wrapping
+	term_writeStr(term, "Welcome to the desert of the real. I thought what I'd do was I'd pretend I was one of those deaf mutes.\n\n");
+	
+	// Test colors
+	term_setColor(term, make_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE));
+	term_writeStr(term, "This text should be inverse.\n");
+	term_setColor(term, make_color(VGA_COLOR_LIGHT_BLUE, VGA_COLOR_GREEN));
+	term_writeStr(term, "This text should be colorful.\n\n");
+	
+	// Test scrolling
+	term_setColor(term, make_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
+	for (size_t i = 0; i < 20; i++) {
+		term_writeStr(term, "Printing some lines.\n");
+		for (volatile size_t j = 0; j < 100000000; j++);
+	}
+}
+
 // Write a string to a VGA term
 void term_writeStr(struct vgastate *state, const char *data)
 {

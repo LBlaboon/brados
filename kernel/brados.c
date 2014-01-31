@@ -1,36 +1,20 @@
 #include <stddef.h>
+#include <stdint.h>
 
+#include <brados/printk.h>
 #include <brados/string.h>
 #include <video/vga.h>
+#include <multiboot.h>
 
 // Make sure we are using the right compiler
 #if defined(__linux__)
 #error "You are using the wrong compiler."
 #endif
 
-// Test various VGA functionality
-void vgaTests(struct vgastate *term)
-{
-	// Test line wrapping
-	term_writeStr(term, "Welcome to the desert of the real. I thought what I'd do was I'd pretend I was one of those deaf mutes.\n\n");
-	
-	// Test colors
-	term_setColor(term, make_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE));
-	term_writeStr(term, "This text should be inverse.\n");
-	term_setColor(term, make_color(VGA_COLOR_LIGHT_BLUE, VGA_COLOR_GREEN));
-	term_writeStr(term, "This text should be colorful.\n\n");
-	
-	// Test scrolling
-	term_setColor(term, make_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
-	for (size_t i = 0; i < 20; i++) {
-		term_writeStr(term, "Printing some lines.\n");
-		for (volatile size_t j = 0; j < 100000000; j++);
-	}
-}
-
 // Main kernel function
-void brados_main()
+void brados_main(uint32_t multiMagic, uint32_t multiAddr)
 {
+	// Initialize VGA terminal
 	struct vgastate term;
 	term_init(&term);
 	
@@ -38,7 +22,21 @@ void brados_main()
 	term_writeStr(&term, "Welcome to BRaDOS!\n");
 	term_writeStr(&term, "written by L. Bradley LaBoon\n\n");
 	
-	vgaTests(&term);
+	// VGA tests
+	//term_test(&term);
 	
+	// Get multiboot info
+	printk(&term, "Multiboot value: %x\n", multiMagic);
+	if (multiMagic != 0x2BADB002) {
+		term_writeStr(&term, "Error! Multiboot header not present. Quitting.\n");
+		return;
+	}
+	printk(&term, "Multiboot address: %x\n", multiAddr);
+	struct multiboot_header *multiHead = (struct multiboot_header *) multiAddr;
+	printk(&term, "Flags: %x\nMem Lower: %x\nMem Upper: %x\n", multiHead->flags, multiHead->mem_lower, multiHead->mem_upper);
+	char *bootName = (char *) multiHead->boot_loader_name;
+	printk(&term, "Boot loader: %s\n\n", bootName);
+	
+	// Done
 	term_writeStr(&term, "Done.");
 }

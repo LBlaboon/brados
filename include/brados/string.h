@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+int strindexof(char c, const char *str);
 size_t strlen(const char *str);
 
 #endif

@@ -5,7 +5,7 @@ GNU	?= $(PREFIX)/$(ARCH)/bin/$(ARCH)
 
 # Source files
 SOURCES_ASM	:= arch/$(ARCH)/boot.s
-SOURCES_C	:= driver/video/vga.c kernel/brados.c lib/string.c
+SOURCES_C	:= arch/$(ARCH)/multiboot.c driver/video/vga.c kernel/brados.c kernel/printk.c lib/string.c
 
 # Object files
 OBJS	:= $(patsubst %.s,%.o,$(SOURCES_ASM))
