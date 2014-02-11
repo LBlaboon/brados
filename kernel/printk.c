@@ -202,7 +202,7 @@ int printk(struct vgastate *term, const char *fmt, ...)
 					break;
 				// Unknown character; just print the character
 				default:
-					term_putChar(term, fmt[i+end]);
+					term_putChar(term, fmt[i]);
 					numPrinted++;
 					end = 1;
 					break;
