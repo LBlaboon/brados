@@ -13,14 +13,14 @@ OBJS	+= $(patsubst %.c,%.o,$(SOURCES_C))
 
 # Build flags
 CFLAGS = -std=gnu99 -ffreestanding -Iinclude/ -O2 -Wall -Wextra
-LDFLAGS = -ffreestanding -O2 -nostdlib -lgcc
+LDFLAGS = -ffreestanding -O2 -nostdlib
 
 # Build rules
 all: brados.bin
 .PHONY: all clean
 
 brados.bin: $(OBJS) arch/$(ARCH)/linker.ld
-	$(GNU)-gcc -T arch/$(ARCH)/linker.ld -o $@ $(LDFLAGS) $(OBJS)
+	$(GNU)-gcc -T arch/$(ARCH)/linker.ld -o $@ $(LDFLAGS) $(OBJS) -lgcc
 
 clean:
 	rm -f $(OBJS) brados.bin

@@ -19,24 +19,41 @@ void brados_main(uint32_t multiMagic, uint32_t multiAddr)
 	term_init(&term);
 	
 	// Welcome message
-	term_writeStr(&term, "Welcome to BRaDOS!\n");
-	term_writeStr(&term, "written by L. Bradley LaBoon\n\n");
-	
-	// VGA tests
-	//term_test(&term);
+	printk(&term, "Welcome to BRaDOS!\n");
+	printk(&term, "written by L. Bradley LaBoon\n\n");
 	
 	// Get multiboot info
-	printk(&term, "Multiboot value: %x\n", multiMagic);
 	if (multiMagic != 0x2BADB002) {
-		term_writeStr(&term, "Error! Multiboot header not present. Quitting.\n");
+		printk(&term, "Error! Multiboot header not present. Quitting.\n");
 		return;
 	}
-	printk(&term, "Multiboot address: %x\n", multiAddr);
 	struct multiboot_header *multiHead = (struct multiboot_header *) multiAddr;
-	printk(&term, "Flags: %x\nMem Lower: %x\nMem Upper: %x\n", multiHead->flags, multiHead->mem_lower, multiHead->mem_upper);
-	char *bootName = (char *) multiHead->boot_loader_name;
-	printk(&term, "Boot loader: %s\n\n", bootName);
+	if ((multiHead->flags >> 6) % 2 != 1) {
+		printk(&term, "Error! Memory map not available from bootloader. Quitting.\n");
+		return;
+	}
+	struct multiboot_mmap *memmap = (struct multiboot_mmap *) multiHead->mmap_addr;
+	
+	// Print memory map
+	printk(&term, "Memory map:\n");
+	int numEntries = multiHead->mmap_length / sizeof(struct multiboot_mmap);
+	uint64_t lastAddr = 0;
+	for (int i = 0; i < numEntries; i++) {
+		if (memmap[i].base_addr != lastAddr) {
+			printk(&term, "%llx - %llx: Unknown\n", lastAddr, memmap[i].base_addr - 1);
+			lastAddr = memmap[i].base_addr;
+		}
+		
+		printk(&term, "%llx - %llx: ", memmap[i].base_addr, memmap[i].base_addr + memmap[i].length - 1);
+		if (memmap[i].type == 1)
+			printk(&term, "Available\n");
+		else
+			printk(&term, "Reserved\n");
+		
+		lastAddr = memmap[i].base_addr + memmap[i].length;
+	}
+	
 	
 	// Done
-	term_writeStr(&term, "Done.");
+	term_writeStr(&term, "\nDone.");
 }
