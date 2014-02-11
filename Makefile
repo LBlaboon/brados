@@ -1,5 +1,5 @@
 # Build environment
-PREFIX	?= /home/brad/brados/brados-gcc
+PREFIX	?= /usr/local/cross
 ARCH	?= i586-elf
 GNU	?= $(PREFIX)/$(ARCH)/bin/$(ARCH)
 
