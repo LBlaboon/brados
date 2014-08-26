@@ -40,11 +40,11 @@ void brados_main(uint32_t multiMagic, uint32_t multiAddr)
 	uint64_t lastAddr = 0;
 	for (int i = 0; i < numEntries; i++) {
 		if (memmap[i].base_addr != lastAddr) {
-			printk(&term, "%llx - %llx: Unknown\n", lastAddr, memmap[i].base_addr - 1);
+			printk(&term, "%#llx - %#llx: Unknown\n", lastAddr, memmap[i].base_addr - 1);
 			lastAddr = memmap[i].base_addr;
 		}
 		
-		printk(&term, "%llx - %llx: ", memmap[i].base_addr, memmap[i].base_addr + memmap[i].length - 1);
+		printk(&term, "%#llx - %#llx: ", memmap[i].base_addr, memmap[i].base_addr + memmap[i].length - 1);
 		if (memmap[i].type == 1)
 			printk(&term, "Available\n");
 		else
@@ -55,5 +55,5 @@ void brados_main(uint32_t multiMagic, uint32_t multiAddr)
 	
 	
 	// Done
-	term_writeStr(&term, "\nDone.");
+	printk(&term, "\nDone.");
 }
