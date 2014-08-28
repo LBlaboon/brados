@@ -165,8 +165,8 @@ int printk(struct vgastate *term, const char *fmt, ...)
 			mode |= 0x06;
 			length = 5;
 			break;
-		case 'd':
 		// Print a signed integer
+		case 'd':
 		case 'i': {
 			intmax_t num;
 			uintmax_t unum;
@@ -208,7 +208,7 @@ int printk(struct vgastate *term, const char *fmt, ...)
 				flen += (precision - len);
 			if (num < 0)
 				flen++;
-			if (num >= 0 && ((mode >> 3) % 2 == 1 || (mode >> 4) % 2 == 1))
+			if (num >= 0 && (mode >> 3) + (mode >> 4) > 0)
 				flen++;
 			
 			// If specified, print preceding space padding
@@ -368,7 +368,7 @@ int printk(struct vgastate *term, const char *fmt, ...)
 			}
 			
 			// Get the length of the printed number
-			unsigned int len = numLen(num, 10);
+			unsigned int len = numLen(num, 16);
 			
 			// Get the length of the printed number with formatting
 			unsigned int flen = len;
@@ -464,7 +464,7 @@ int printk(struct vgastate *term, const char *fmt, ...)
 			}
 			
 			// Get the length of the printed number
-			unsigned int len = numLen(num, 10);
+			unsigned int len = numLen(num, 8);
 			
 			// Get the length of the printed number with formatting
 			unsigned int flen = len;
